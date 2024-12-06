@@ -13,6 +13,24 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
         /// <summary>
         /// The difficulty corresponding to the stamina skill.
         /// </summary>
+        [JsonProperty("optimal_bpm")]
+        public double optimalBPM { get; set; }
+
+        /// <summary>
+        /// The difficulty corresponding to the stamina skill.
+        /// </summary>
+        [JsonProperty("cv")]
+        public double reading_cv { get; set; }
+
+        /// <summary>
+        /// The difficulty corresponding to the stamina skill.
+        /// </summary>
+        [JsonProperty("hdfl_multiplier")]
+        public double hdfl_multiplier { get; set; }
+
+        /// <summary>
+        /// The difficulty corresponding to the stamina skill.
+        /// </summary>
         [JsonProperty("stamina_difficulty")]
         public double StaminaDifficulty { get; set; }
 
@@ -33,6 +51,12 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
         /// </summary>
         [JsonProperty("reading_difficulty")]
         public double ReadingDifficulty { get; set; }
+
+        /// <summary>
+        /// The difficulty corresponding to the reading skill.
+        /// </summary>
+        [JsonProperty("reading ratio")]
+        public double ReadingRatio { get; set; }
 
         /// <summary>
         /// Determines the object density of a beatmap, based on DeltaTime.

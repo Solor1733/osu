@@ -15,6 +15,8 @@ using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Colour;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Reading;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Rhythm.Data;
+using static osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.EntropyCalculator;
+using static osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Reading.ReadingScaling;
 using osu.Game.Rulesets.Taiko.Difficulty.Skills;
 using osu.Game.Rulesets.Taiko.Mods;
 using osu.Game.Rulesets.Taiko.Scoring;
@@ -29,6 +31,15 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
         private const double colour_skill_multiplier = 0.425 * difficulty_multiplier;
         private const double stamina_skill_multiplier = 0.375 * difficulty_multiplier;
 
+        private const double reading_scale_smoothness = 5;
+        private const double reading_scale_tolerence = 30;
+        private const double reading_scale_rate_change = 0.015;
+
+        private const double reading_minProportion = 0.2;
+        private const double reading_maxProportion = 0.7;
+        private const double maxCV = 2;
+        private const double weightStrength = 10;
+
         private double simpleRhythmPenalty = 1;
         private double simpleColourPenalty = 1;
 
@@ -36,6 +47,11 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
         private double rhythmDifficultStrains;
         private double readingDifficultStrains;
         private double staminaDifficultStrains;
+
+        private IEnumerable<double> DeltaTimes;
+        private double OptimalBPM;
+        private double Reading_cv;
+        private double HDFLMultiplier;
 
         public override int Version => 20241115;
 
@@ -65,6 +81,8 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
             new TaikoModHalfTime(),
             new TaikoModEasy(),
             new TaikoModHardRock(),
+            new TaikoModHidden(),
+            new TaikoModFlashlight(),
         };
 
         protected override IEnumerable<DifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, double clockRate)
@@ -99,6 +117,14 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
             TaikoColourDifficultyPreprocessor.ProcessAndAssign(difficultyHitObjects);
             EvenPatterns.GroupPatterns(groupedHitObjects);
             bpmLoader.ProcessEffectiveBPM(beatmap.ControlPointInfo, clockRate);
+
+            DeltaTimes = difficultyHitObjects.Select(obj => obj.DeltaTime).ToList();
+            Reading_cv = CalculateCoefficientOfVariation(DeltaTimes);
+            
+            OptimalBPM = CalculateOptimalBPM(DeltaTimes, reading_minProportion, reading_maxProportion, maxCV);
+            HDFLMultiplier = CalculateHDFLMultiplier(difficultyHitObjects.Count);
+
+            HDFLMultiplier = Math.Pow(HDFLMultiplier, 1.2);
 
             return difficultyHitObjects;
         }
@@ -145,19 +171,41 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
             double rhythmRating = rhythm.DifficultyValue() * rhythm_skill_multiplier;
             double readingRating = reading.DifficultyValue() * reading_skill_multiplier;
             double objectDensity = reading.ObjectDensity;
-            double staminaRating = stamina.DifficultyValue() * stamina_skill_multiplier;
-            double monoStaminaRating = singleColourStamina.DifficultyValue() * stamina_skill_multiplier;
-            double monoStaminaFactor = staminaRating == 0 ? 1 : Math.Pow(monoStaminaRating / staminaRating, 5);
 
             colourDifficultStrains = colour.CountTopWeightedStrains();
             rhythmDifficultStrains = rhythm.CountTopWeightedStrains();
             readingDifficultStrains = reading.CountTopWeightedStrains();
             staminaDifficultStrains = stamina.CountTopWeightedStrains() * Math.Min(clockRate, 1.25); // Bonus is capped past 1.25x rate
 
+            
+            double staminaRating = stamina.DifficultyValue() * stamina_skill_multiplier;
+            double monoStaminaRating = singleColourStamina.DifficultyValue() * stamina_skill_multiplier;
+            double monoStaminaFactor = staminaRating == 0 ? 1 : Math.Pow(monoStaminaRating / staminaRating, 5);
+
+            
+
             double patternPenalty = simplePatternPenalty(rhythmRating, colourRating, clockRate);
 
             double combinedRating = combinedDifficultyValue(rhythm, reading, colour, stamina);
             double starRating = rescale(combinedRating * 1.8);
+
+            double readingRatio = 0;
+            if(mods.Any(m => m is TaikoModFlashlight) && mods.Any(m => m is TaikoModHidden))
+            {
+                readingRatio = 1;
+                starRating = CalculateHDFLStarRating(rescale(combinedRating * 1.8), HDFLMultiplier);
+            }
+            else
+            {
+                if(reading.CountTopWeightedStrains() <= reading_scale_tolerence)
+                {
+                    readingRatio = 0;
+                }
+                else
+                {
+                    readingRatio = Math.Pow(1 - Math.Pow(Math.Exp(1), (-reading_scale_rate_change * (reading.CountTopWeightedStrains() - reading_scale_tolerence))), reading_scale_smoothness);
+                }
+            }
 
             // Converts are penalised outside of the scope of difficulty calculation, as our assumptions surrounding playstyle becomes out-of-scope.
             if (beatmap.BeatmapInfo.Ruleset.OnlineID == 0)
@@ -172,11 +220,15 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
             {
                 StarRating = starRating,
                 Mods = mods,
+                optimalBPM = OptimalBPM, // Optimal BPM is the constant speed where the map is at its easiest to read state.
+                reading_cv = Reading_cv,
+                hdfl_multiplier = HDFLMultiplier,
                 StaminaDifficulty = staminaRating,
                 MonoStaminaFactor = monoStaminaFactor,
                 SimplePattern = patternPenalty,
                 RhythmDifficulty = rhythmRating * 8,
                 ReadingDifficulty = readingRating * 1.5,
+                ReadingRatio = readingRatio, // Reading Ratio is between 1 and 0, while 1 being when HDFL is on, and 0 being the map at its easiest to read state.
                 ObjectDensity = objectDensity,
                 ColourDifficulty = colourRating,
                 StaminaTopStrains = staminaDifficultStrains,
@@ -187,7 +239,6 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
                 OkHitWindow = hitWindows.WindowFor(HitResult.Ok) / clockRate,
                 MaxCombo = beatmap.GetMaxCombo(),
             };
-
             return attributes;
         }
 
