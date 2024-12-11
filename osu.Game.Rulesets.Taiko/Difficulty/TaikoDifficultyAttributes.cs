@@ -11,19 +11,19 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
     public class TaikoDifficultyAttributes : DifficultyAttributes
     {
         /// <summary>
-        /// The difficulty corresponding to the stamina skill.
+        /// The BPM where the map becomes the easiest to read.
         /// </summary>
         [JsonProperty("optimal_bpm")]
         public double optimalBPM { get; set; }
 
         /// <summary>
-        /// The difficulty corresponding to the stamina skill.
+        /// The CV for delta time of each hit objects.
         /// </summary>
         [JsonProperty("cv")]
         public double reading_cv { get; set; }
 
         /// <summary>
-        /// The difficulty corresponding to the stamina skill.
+        /// The multiplier of SR when HDFL is applied.
         /// </summary>
         [JsonProperty("hdfl_multiplier")]
         public double hdfl_multiplier { get; set; }
@@ -69,6 +69,12 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
         /// </summary>
         [JsonProperty("colour_difficulty")]
         public double ColourDifficulty { get; set; }
+
+        /// <summary>
+        /// How many notes the player has to memorize to memorize the whole map.
+        /// </summary>
+        [JsonProperty("memory_notes")]
+        public double MemoryDifficulty { get; set; }
 
         /// <summary>
         /// The penalty factor corresponding to patterns based on their correlation between skills.
