@@ -17,12 +17,6 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
         public double optimalBPM { get; set; }
 
         /// <summary>
-        /// The CV for delta time of each hit objects.
-        /// </summary>
-        [JsonProperty("cv")]
-        public double reading_cv { get; set; }
-
-        /// <summary>
         /// The multiplier of SR when HDFL is applied.
         /// </summary>
         [JsonProperty("hdfl_multiplier")]

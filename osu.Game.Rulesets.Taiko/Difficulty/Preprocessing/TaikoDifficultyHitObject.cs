@@ -39,7 +39,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Preprocessing
         /// <summary>
         /// The list of all <see cref="TaikoDifficultyHitObject"/> that is either a regular note or finisher in the beatmap
         /// </summary>
-        private readonly IReadOnlyList<TaikoDifficultyHitObject> noteDifficultyHitObjects;
+        public readonly IReadOnlyList<TaikoDifficultyHitObject> noteDifficultyHitObjects;
 
         /// <summary>
         /// The index of this <see cref="TaikoDifficultyHitObject"/> in <see cref="noteDifficultyHitObjects"/>.
@@ -110,6 +110,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Preprocessing
                 noteObjects.Add(this);
             }
         }
+
 
         public TaikoDifficultyHitObject? PreviousMono(int backwardsIndex) => monoDifficultyHitObjects?.ElementAtOrDefault(MonoIndex - (backwardsIndex + 1));
 
