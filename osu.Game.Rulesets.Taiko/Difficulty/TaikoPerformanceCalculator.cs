@@ -72,7 +72,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
         {
             double difficultyValue = Math.Pow(5 * Math.Max(1.0, attributes.StarRating / 0.115) - 4.0, 2.25) / 1150.0;
 
-            double lengthBonus = 1 + 0.1 * Math.Min(1.0, (double)totalHits / 1500.0);
+            double lengthBonus = 1 + 0.1 * Math.Min(1.0, totalHits / 1500.0);
 
             difficultyValue *= lengthBonus;
 

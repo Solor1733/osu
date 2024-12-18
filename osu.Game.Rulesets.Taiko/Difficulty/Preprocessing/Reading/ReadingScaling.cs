@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Taiko.Mods;
@@ -14,15 +13,13 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Reading
         /// <summary>
         /// Calculates the star rating of a map when applying HDFL given Lowest SR and multiplier
         /// </summary>
-        public static double CalculateReadingStarRating(double starRating, double HDFLMultiplier, double ReadingRatio)
+        public static double CalculateReadingStarRating(double starRating, double hdflMultiplier, double readingRatio)
         {
-            // Calculate the current value of a using the given StarRating
-            double a = Math.Pow(5 * Math.Max(1.0, starRating / 0.115) - 4.0, 2.25) / 1150.0;
-
             // Approximate PP multiplier by scaling StarRating directly based on HDFLMultiplier and the calculated a.
-            double HDFLStarRating = starRating * HDFLMultiplier;
 
-            double newStarRating = starRating + (HDFLStarRating - starRating) * ReadingRatio;
+            double hdflStarRating = starRating * hdflMultiplier;
+
+            double newStarRating = starRating + (hdflStarRating - starRating) * readingRatio;
 
             return newStarRating;
         }
@@ -34,11 +31,11 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Reading
         {
             double ratioCount = objectCount / 3000;
 
-            double HDFLMultiplier = ratioCount <= 1
+            double hdflMultiplier = ratioCount <= 1
                 ? 1 + 0.2 * Math.Pow(ratioCount, 0.25)
                 : 1 + 0.2 * Math.Pow(ratioCount, 0.325);
 
-            return Math.Pow(HDFLMultiplier, 1.2 / 1.1);
+            return Math.Pow(hdflMultiplier, 1.2 / 1.1);
         }
 
         /// <summary>
@@ -55,39 +52,27 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Reading
         /// </summary>
         public static double CalculateReadingRatio(double readingDifficulty, double objectCount, double HDFLMultiplier, Mod[] mods)
         {
-            double readingRatio;
-
             // If HDFL is on, return readingRatio = 1
             if (mods.Any(m => m is TaikoModFlashlight) && mods.Any(m => m is TaikoModHidden))
             {
                 return 1;
             }
 
-            //Calculate a for exponent
-            double a;
-            if(objectCount <= 3000)
-            {
-                a = 0.25;
-            }
-            else
-            {
-                a=0.325;
-            }
+            // Please comment this
+            double memoryLengthBonus = objectCount <= 3000 ? 0.25 : 0.325;
 
             //Calculate Exponent for reading ratio
-            double exponent = Math.Max((Math.Log(0.25) + (12 * a / 11) * Math.Log(3000 / objectCount)) / Math.Log(CalculateReadingDifficulty(mods)), 0.6);
+            double exponent = Math.Max((Math.Log(0.25) + (12 * memoryLengthBonus / 11) * Math.Log(3000 / objectCount)) / Math.Log(0.35), 0.6);
 
             // Calculate reading ratio
-            readingRatio = Math.Pow(CalculateReadingDifficulty(mods), exponent);
+            double readingRatio = Math.Pow(CalculateReadingDifficulty(mods), exponent);
 
             return readingRatio;
         }
 
-
         //TESTING VALUES!!! WIP
         public static double CalculateReadingDifficulty(/*IEnumerable<double> NotesEffectiveBPM,*/Mod[] mods)
         {
-
             if (mods.Any(m => m is TaikoModFlashlight) && mods.Any(m => m is TaikoModHidden))
             {
                 return 1;
