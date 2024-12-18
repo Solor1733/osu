@@ -172,12 +172,11 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
 
             double patternPenalty = simplePatternPenalty(rhythmRating, colourRating, clockRate);
             double combinedRating = combinedDifficultyValue(rhythm, reading, colour, stamina);
-            
-            bool hasHdfl = mods.Any(m => m is TaikoModFlashlight) && mods.Any(m => m is TaikoModHidden);
 
-            double readingRatio = CalculateReadingRatio(reading.CountTopWeightedStrains(), hasHdfl);
-
+            // This part can be simplified more, remember to do it when readingScaling is done.
             double HDFLMultiplier = CalculateMultiplier(memoryRating);
+
+            double readingRatio = CalculateReadingRatio(0, memoryRating, HDFLMultiplier, mods);          
 
             double starRating = CalculateReadingStarRating(rescale(combinedRating * 1.8), HDFLMultiplier, readingRatio);
 

@@ -61,6 +61,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Preprocessing
                 // Normalize CV value between 0 and 1
                 double t = (cv - cv_low_threshold) / (cv_high_threshold - cv_low_threshold);
                 // Apply Gaussian function to generate weight strength
+                // Maps with CV in between 0.8 and 1 should have a higher weight towards hard sections
                 weightStrength = 1 + (3 - 1) * Math.Exp(-Math.Pow(t - (cv_high_threshold - cv_low_threshold)/2, 2) / (2 * Math.Pow(standardDeviation, 2)));
             }
 
@@ -74,6 +75,12 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Preprocessing
             if (optimalBPM < 60)
             {
                 optimalBPM = 60;
+            }
+
+            // Cap maximum BPM at 450
+            if (optimalBPM > 450)
+            {
+                optimalBPM = 450;
             }
 
             return optimalBPM;

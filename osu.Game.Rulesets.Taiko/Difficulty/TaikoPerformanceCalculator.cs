@@ -22,7 +22,6 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
         private double? estimatedUnstableRate;
 
         private double effectiveMissCount;
-        //private double HDFLMultiplier = 1;
 
         public TaikoPerformanceCalculator()
             : base(new TaikoRuleset())
@@ -48,16 +47,8 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
 
             double multiplier = 1.13;
 
-            /*if (score.Mods.Any(m => m is ModHidden) && !isConvert)
-                multiplier *= 1.075;*/
-
-            if (score.Mods.Any(m => m is ModEasy))
-                multiplier *= 0.950;
-
-            /*if(!score.Mods.Any(m => m is ModFlashlight<TaikoHitObject>) || !score.Mods.Any(m => m is ModHidden))
-            {
-                HDFLMultiplier = 1;
-            }*/
+            /*if (score.Mods.Any(m => m is ModEasy))
+                multiplier *= 0.950;*/
 
             double difficultyValue = computeDifficultyValue(score, taikoAttributes);
             double accuracyValue = computeAccuracyValue(score, taikoAttributes, isConvert);
@@ -82,16 +73,6 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
             double difficultyValue = Math.Pow(5 * Math.Max(1.0, attributes.StarRating / 0.115) - 4.0, 2.25) / 1150.0;
 
             double lengthBonus = 1 + 0.1 * Math.Min(1.0, (double)totalHits / 1500.0);
-            /*double HDFLlengthBonus;
-
-            if(totalHits <= 3000)
-            {
-                HDFLlengthBonus = 1 + 0.2 * (Math.Pow(((double)totalHits / 3000), 0.25));
-            }
-            else
-            {
-                HDFLlengthBonus = 1 + 0.2 * (Math.Sqrt((double)totalHits / 3000));
-            }*/
 
             difficultyValue *= lengthBonus;
 
@@ -99,15 +80,6 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
 
             if (score.Mods.Any(m => m is ModEasy))
                 difficultyValue *= 0.90;
-
-            /*if (score.Mods.Any(m => m is ModFlashlight<TaikoHitObject>) && score.Mods.Any(m => m is ModHidden))
-            {
-                HDFLMultiplier = Math.Pow(Math.Max(1, HDFLlengthBonus), 1.2);
-            }
-            else if (score.Mods.Any(m => m is ModHidden))
-                difficultyValue *= 1.025;
-            else if (score.Mods.Any(m => m is ModFlashlight<TaikoHitObject>))
-                difficultyValue *= Math.Max(1, 1.050 - Math.Min(attributes.MonoStaminaFactor / 50, 1) * HDFLlengthBonus);*/
 
             if (estimatedUnstableRate == null)
                 return 0;
