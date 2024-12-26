@@ -15,7 +15,7 @@ using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Colour;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Reading;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Rhythm.Data;
-using static osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.OptimalBPMProcessor;
+using static osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Reading.OptimalBPMProcessor;
 using static osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Reading.ReadingScaling;
 using osu.Game.Rulesets.Taiko.Difficulty.Skills;
 using osu.Game.Rulesets.Taiko.Mods;
@@ -110,7 +110,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
             DeltaTimes = difficultyHitObjects.Select(obj => obj.DeltaTime).ToList();
-            
+
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
             return difficultyHitObjects;
@@ -176,7 +176,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
             // This part can be simplified more, remember to do it when readingScaling is done.
             double HDFLMultiplier = CalculateMultiplier(memoryRating);
 
-            double readingRatio = CalculateReadingRatio(0, memoryRating, HDFLMultiplier, mods);          
+            double readingRatio = CalculateReadingRatio(CalculateReadingDifficulty(mods), memoryRating, HDFLMultiplier, mods);
 
             double starRating = CalculateReadingStarRating(rescale(combinedRating * 1.8), HDFLMultiplier, readingRatio);
 
