@@ -15,7 +15,6 @@ using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Colour;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Reading;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Rhythm.Data;
-using static osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Reading.OptimalBPMProcessor;
 using static osu.Game.Rulesets.Taiko.Difficulty.Preprocessing.Reading.ReadingScaling;
 using osu.Game.Rulesets.Taiko.Difficulty.Skills;
 using osu.Game.Rulesets.Taiko.Mods;
@@ -39,8 +38,6 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
         private double rhythmDifficultStrains;
         private double readingDifficultStrains;
         private double staminaDifficultStrains;
-
-        private IEnumerable<double> DeltaTimes;
 
         public override int Version => 20241115;
 
@@ -84,6 +81,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
             var rimObjects = new List<TaikoDifficultyHitObject>();
             var noteObjects = new List<TaikoDifficultyHitObject>();
             EffectiveBPMPreprocessor bpmLoader = new EffectiveBPMPreprocessor(beatmap, noteObjects);
+            OptimalBPMPreprocessor optimalbpmLoader = new OptimalBPMPreprocessor(noteObjects);
 
             // Generate TaikoDifficultyHitObjects from the beatmap's hit objects.
             for (int i = 2; i < beatmap.HitObjects.Count; i++)
@@ -106,12 +104,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
             TaikoColourDifficultyPreprocessor.ProcessAndAssign(difficultyHitObjects);
             EvenPatterns.GroupPatterns(groupedHitObjects);
             bpmLoader.ProcessEffectiveBPM(beatmap.ControlPointInfo, clockRate);
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////
-
-            DeltaTimes = difficultyHitObjects.Select(obj => obj.DeltaTime).ToList();
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////
+            optimalbpmLoader.ProcessOptimalBPM();
 
             return difficultyHitObjects;
         }
@@ -158,7 +151,6 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
             double rhythmRating = rhythm.DifficultyValue() * rhythm_skill_multiplier;
             double readingRating = reading.DifficultyValue() * reading_skill_multiplier;
             double objectDensity = reading.ObjectDensity;
-            double OptimalBPM = CalculateOptimalBPM(DeltaTimes);
 
             colourDifficultStrains = colour.CountTopWeightedStrains();
             rhythmDifficultStrains = rhythm.CountTopWeightedStrains();
@@ -193,7 +185,6 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
             {
                 StarRating = starRating,
                 Mods = mods,
-                optimalBPM = OptimalBPM, // Optimal BPM is the constant speed where the map is at its easiest to read state.
                 hdfl_multiplier = HDFLMultiplier,
                 StaminaDifficulty = staminaRating,
                 MonoStaminaFactor = monoStaminaFactor,

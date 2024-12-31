@@ -27,6 +27,11 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Preprocessing
         public double EffectiveBPM;
 
         /// <summary>
+        /// The optimal BPM of this hit object, based on delta time.
+        /// </summary>
+        public double OptimalBPM;
+
+        /// <summary>
         /// The current slider velocity of this hit object.
         /// </summary>
         public double CurrentSliderVelocity;

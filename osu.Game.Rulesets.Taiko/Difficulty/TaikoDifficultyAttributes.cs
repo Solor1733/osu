@@ -11,12 +11,6 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
     public class TaikoDifficultyAttributes : DifficultyAttributes
     {
         /// <summary>
-        /// The BPM where the map becomes the easiest to read.
-        /// </summary>
-        [JsonProperty("optimal_bpm")]
-        public double optimalBPM { get; set; }
-
-        /// <summary>
         /// The multiplier of SR when HDFL is applied.
         /// </summary>
         [JsonProperty("hdfl_multiplier")]

@@ -3,8 +3,7 @@ Done:
   -RR is set to 1 when HDFL enabled
   -A flexible formula for calculating RR when given a reading difficulty value (double)
 -Optimal BPM
-  -Gives a easiest to read BPM for the map, any changes to SV will only make the map harder
-  -Not perfect but as close as I could get
+  -An attribute of difficulty hit object
 -Define a gap between the easiest state and HDFL
   -It gives normal SR and PP now.
   -Everything related to this should be somewhat clean now...
@@ -12,11 +11,9 @@ Done:
   -When RR is 0, it's 7 star, when RR is 1, it's mid-8-star
   -Use linear function for now
 
-Needs Fixing:
-  MOVE DELTATIME OUTSIDE IT RUNS SO SLOW
-
 Not Done:
 -A calculator for reading difficulty
   -This value is not like strain, the result it gives will be converted to RR
   -The less it has to do with SR, the better
   -It should include mods
+-Functions for HDHR, EZHD, FL

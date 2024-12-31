@@ -16,7 +16,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Skills
     public class Reading : StrainDecaySkill
     {
         protected override double SkillMultiplier => 1.0;
-        protected override double StrainDecayBase => 0.4;
+        protected override double StrainDecayBase => 0.8;
 
         private double currentStrain;
 
